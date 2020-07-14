@@ -111,7 +111,7 @@ class STrack(BaseTrack):
         self.obj_index = new_track.obj_index
 
     @property
-    @jit
+    # @jit
     def tlwh(self):
         """Get current position in bounding box format `(top left x, top left y,
                 width, height)`.
@@ -124,7 +124,7 @@ class STrack(BaseTrack):
         return ret
 
     @property
-    @jit
+    # @jit
     def tlbr(self):
         """Convert bounding box to format `(min x, min y, max x, max y)`, i.e.,
         `(top left, bottom right)`.
@@ -167,8 +167,8 @@ class STrack(BaseTrack):
 
 class JDETracker(object):
 
-    def __init__(self, max_time_lost=30, feature_thres=0.7,
-                 iou_thres=0.5, iou_thres_unconfirmed=0.7):
+    def __init__(self, max_time_lost=30, feature_dist_thres=0.7,
+                 iou_dist_thres=0.5, iou_dist_thres_unconfirmed=0.7):
 
         self.tracked_stracks = []  # type: list[STrack]
         self.lost_stracks = []  # type: list[STrack]
@@ -176,9 +176,9 @@ class JDETracker(object):
 
         self.frame_id = 0
         self.max_time_lost = max_time_lost
-        self.feature_thres = feature_thres
-        self.iou_thres = iou_thres
-        self.iou_thres_unconfirmed = iou_thres_unconfirmed
+        self.feature_dist_thres = feature_dist_thres
+        self.iou_dist_thres = iou_dist_thres
+        self.iou_dist_thres_unconfirmed = iou_dist_thres_unconfirmed
 
         self.kalman_filter = KalmanFilter()
 
@@ -232,7 +232,7 @@ class JDETracker(object):
             self.kalman_filter, dists, strack_pool, detections)
         # The dists is the list of distances of the detection with the tracks in strack_pool
         matches, u_track, u_detection = linear_assignment(
-            dists, thresh=self.feature_thres)
+            dists, thresh=self.feature_dist_thres)
         # The matches is the array for corresponding matches of the detection with the corresponding strack_pool
 
         for itracked, idet in matches:
@@ -259,7 +259,7 @@ class JDETracker(object):
                 r_tracked_stracks.append(strack_pool[i])
         dists = iou_distance(r_tracked_stracks, detections)
         matches, u_track, u_detection = linear_assignment(
-            dists, thresh=self.iou_thres)
+            dists, thresh=self.iou_dist_thres)
         # matches is the list of detections which matched with corresponding tracks by IOU distance method
         for itracked, idet in matches:
             track = r_tracked_stracks[itracked]
@@ -283,7 +283,7 @@ class JDETracker(object):
         detections = [detections[i] for i in u_detection]
         dists = iou_distance(unconfirmed, detections)
         matches, u_unconfirmed, u_detection = linear_assignment(
-            dists, thresh=self.iou_thres_unconfirmed)
+            dists, thresh=self.iou_dist_thres_unconfirmed)
         for itracked, idet in matches:
             unconfirmed[itracked].update(detections[idet], self.frame_id)
             activated_stracks.append(unconfirmed[itracked])
