@@ -35,8 +35,8 @@ class TRMOTTracker(Tracker):
         return grouped_tracks
 
     def get_tracked_detection(self, detection):
-        track_ids = torch.zeros((len(detection)), dtype=torch.int)
-        states = torch.zeros((len(detection)), dtype=torch.int)
+        track_ids = torch.full((len(detection),), -1, dtype=torch.int)
+        states = torch.zeros((len(detection),), dtype=torch.int)
         track_boxes = torch.zeros((len(detection), 4))
         image_speeds = torch.zeros((len(detection), 2))
         for tracker in self.trackers.values():
@@ -50,6 +50,7 @@ class TRMOTTracker(Tracker):
                 speed = torch.as_tensor([
                     track.mean[4], track.mean[5] + track.mean[7] / 2])
                 image_speeds[obj_i] = speed * self.frame_rate
+        assert (track_ids >= 0).all(), 'Not all objects are tracked'
         detection.track_ids = track_ids
         detection.track_states = states
         detection.track_boxes = track_boxes
