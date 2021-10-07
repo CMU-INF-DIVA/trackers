@@ -134,7 +134,7 @@ class STrack(BaseTrack):
         return ret
 
     @staticmethod
-    @jit
+    # @jit
     def tlwh_to_xyah(tlwh):
         """Convert bounding box to format `(center x, center y, aspect ratio,
         height)`, where the aspect ratio is `width / height`.
@@ -148,14 +148,14 @@ class STrack(BaseTrack):
         return self.tlwh_to_xyah(self.tlwh)
 
     @staticmethod
-    @jit
+    # @jit
     def tlbr_to_tlwh(tlbr):
         ret = np.asarray(tlbr).copy()
         ret[2:] -= ret[:2]
         return ret
 
     @staticmethod
-    @jit
+    # @jit
     def tlwh_to_tlbr(tlwh):
         ret = np.asarray(tlwh).copy()
         ret[2:] += ret[:2]
